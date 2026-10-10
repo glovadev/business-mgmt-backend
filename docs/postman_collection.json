@@ -1,0 +1,500 @@
+{
+	"info": {
+		"_postman_id": "78a1c90f-90e8-466d-9d41-e970a0dcb512",
+		"name": "Business Management Software API",
+		"description": "Complete Postman collection for testing all 21 modules of the Business Management Software backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "01. System & Health",
+			"item": [
+				{
+					"name": "Liveness Check",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"url": "{{baseUrl}}/health/live"
+					}
+				},
+				{
+					"name": "Readiness Check",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"url": "{{baseUrl}}/health/ready"
+					}
+				},
+				{
+					"name": "System Version",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/system/version"
+					}
+				}
+			]
+		},
+		{
+			"name": "02. Authentication",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.access_token) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.data.access_token);",
+									"    pm.environment.set(\"token\", jsonData.data.access_token);",
+									"    console.log(\"Saved access_token to variable: \", jsonData.data.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/auth/login"
+					}
+				},
+				{
+					"name": "Get Current User Profile",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/auth/me"
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"sample_refresh_token_here\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/auth/refresh"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"sample_refresh_token_here\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/auth/logout"
+					}
+				}
+			]
+		},
+		{
+			"name": "03. Stores",
+			"item": [
+				{
+					"name": "List Stores",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/stores"
+					}
+				},
+				{
+					"name": "Create Store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"STORE-DT-01\",\n  \"name\": \"Downtown Branch\",\n  \"phone\": \"+919876543210\",\n  \"address\": {\n    \"line1\": \"123 Main Street\",\n    \"city\": \"Guwahati\",\n    \"state\": \"Assam\",\n    \"postal_code\": \"781001\",\n    \"country_code\": \"IN\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{baseUrl}}/api/v1/stores"
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Users & RBAC",
+			"item": [
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/users"
+					}
+				},
+				{
+					"name": "List Roles",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/roles"
+					}
+				},
+				{
+					"name": "List Permissions",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/permissions"
+					}
+				}
+			]
+		},
+		{
+			"name": "05. Customers",
+			"item": [
+				{
+					"name": "List Customers",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/customers"
+					}
+				},
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"phone\": \"+919876543210\",\n  \"email\": \"john@example.com\",\n  \"billing_address\": \"MG Road, Bangalore\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/customers"
+					}
+				}
+			]
+		},
+		{
+			"name": "06. Products & Categories",
+			"item": [
+				{
+					"name": "List Product Categories",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/product-categories"
+					}
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Apparel\",\n  \"description\": \"Clothing and wearables\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/product-categories"
+					}
+				},
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/products"
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cotton T-Shirt\",\n  \"sku\": \"TSH-COT-01\",\n  \"sale_price\": \"499.00\",\n  \"hsn_code\": \"61091000\",\n  \"gst_rate\": \"5.00\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/products"
+					}
+				}
+			]
+		},
+		{
+			"name": "07. Suppliers & Purchases",
+			"item": [
+				{
+					"name": "List Suppliers",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/suppliers"
+					}
+				},
+				{
+					"name": "Create Supplier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Fabric Traders Corp\",\n  \"phone\": \"+919123456789\",\n  \"gstin\": \"29ABCDE1234F1Z5\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/suppliers"
+					}
+				},
+				{
+					"name": "List Purchases",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/purchases"
+					}
+				}
+			]
+		},
+		{
+			"name": "08. Inventory",
+			"item": [
+				{
+					"name": "Get Store Inventory",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/inventory?store_id=00000000-0000-0000-0000-000000000001"
+					}
+				},
+				{
+					"name": "Create Inventory Adjustment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store_id\": \"00000000-0000-0000-0000-000000000001\",\n  \"product_id\": \"00000000-0000-0000-0000-000000000002\",\n  \"adjustment_type\": \"ADD\",\n  \"quantity\": \"10\",\n  \"reason\": \"Cycle count variance\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/inventory/adjustments"
+					}
+				}
+			]
+		},
+		{
+			"name": "09. Sales & Invoicing",
+			"item": [
+				{
+					"name": "List Sales / Invoices",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/sales"
+					}
+				},
+				{
+					"name": "Create Sale Invoice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Idempotency-Key", "value": "sale-test-idemp-001" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store_id\": \"00000000-0000-0000-0000-000000000001\",\n  \"customer_id\": \"00000000-0000-0000-0000-000000000002\",\n  \"items\": [\n    {\n      \"product_id\": \"00000000-0000-0000-0000-000000000003\",\n      \"quantity\": \"2\",\n      \"unit_price\": \"500.00\",\n      \"discount_amount\": \"0.00\"\n    }\n  ],\n  \"initial_payment\": {\n    \"amount\": \"1000.00\",\n    \"payment_method\": \"CASH\"\n  }\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/sales"
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Payments",
+			"item": [
+				{
+					"name": "List Payments",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/payments"
+					}
+				},
+				{
+					"name": "Record Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" },
+							{ "key": "Idempotency-Key", "value": "pay-test-idemp-001" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": \"00000000-0000-0000-0000-000000000002\",\n  \"store_id\": \"00000000-0000-0000-0000-000000000001\",\n  \"amount\": \"1000.00\",\n  \"payment_method\": \"UPI\",\n  \"allocation_strategy\": \"FIFO\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/payments"
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Expenses",
+			"item": [
+				{
+					"name": "List Expense Categories",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/expense-categories"
+					}
+				},
+				{
+					"name": "List Expenses",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/expenses"
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Configuration & Settings",
+			"item": [
+				{
+					"name": "Get Company Settings",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/configuration/company"
+					}
+				},
+				{
+					"name": "Update Company Settings",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_name\": \"Apex Retailers Pvt Ltd\",\n  \"currency\": \"INR\",\n  \"timezone\": \"Asia/Kolkata\"\n}"
+						},
+						"url": "{{baseUrl}}/api/v1/configuration/company"
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Reminder Rules & Templates",
+			"item": [
+				{
+					"name": "List Reminder Rules",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/reminder-rules"
+					}
+				},
+				{
+					"name": "List Notification Templates",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/notification-templates"
+					}
+				}
+			]
+		},
+		{
+			"name": "14. Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/notifications"
+					}
+				}
+			]
+		},
+		{
+			"name": "15. Reports & Analytics",
+			"item": [
+				{
+					"name": "Dashboard Summary",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/reports/dashboard"
+					}
+				},
+				{
+					"name": "Profit & Loss Report",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/reports/profit"
+					}
+				},
+				{
+					"name": "Sales Report",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/reports/sales"
+					}
+				}
+			]
+		},
+		{
+			"name": "16. Audit Logs",
+			"item": [
+				{
+					"name": "List Audit Logs",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/api/v1/audit-logs"
+					}
+				}
+			]
+		}
+	]
+}
