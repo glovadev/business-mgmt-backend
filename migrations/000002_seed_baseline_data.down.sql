@@ -1,0 +1,47 @@
+-- ==============================================================================
+-- 000002_seed_baseline_data.down.sql
+-- Reverse 000002_seed_baseline_data.up.sql
+-- ==============================================================================
+
+DELETE FROM document_counters WHERE financial_year = '2026-27';
+DELETE FROM expense_categories WHERE id IN (
+  'cccccccc-cccc-cccc-cccc-cccccccc0001', 'cccccccc-cccc-cccc-cccc-cccccccc0002',
+  'cccccccc-cccc-cccc-cccc-cccccccc0003', 'cccccccc-cccc-cccc-cccc-cccccccc0004',
+  'cccccccc-cccc-cccc-cccc-cccccccc0005', 'cccccccc-cccc-cccc-cccc-cccccccc0006'
+);
+DELETE FROM customer_store_relationships WHERE customer_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+DELETE FROM customers WHERE id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+DELETE FROM suppliers WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+DELETE FROM inventory WHERE store_id = '44444444-4444-4444-4444-444444444444';
+DELETE FROM products WHERE id IN (
+  '99999999-9999-9999-9999-999999999901', '99999999-9999-9999-9999-999999999902',
+  '99999999-9999-9999-9999-999999999903', '99999999-9999-9999-9999-999999999904',
+  '99999999-9999-9999-9999-999999999905'
+);
+DELETE FROM product_categories WHERE id IN (
+  '88888888-8888-8888-8888-888888888801', '88888888-8888-8888-8888-888888888802',
+  '88888888-8888-8888-8888-888888888803', '88888888-8888-8888-8888-888888888804',
+  '88888888-8888-8888-8888-888888888805', '88888888-8888-8888-8888-888888888806'
+);
+DELETE FROM reminder_rules WHERE id IN (
+  '77777777-7777-7777-7777-777777777701', '77777777-7777-7777-7777-777777777702',
+  '77777777-7777-7777-7777-777777777703'
+);
+DELETE FROM notification_templates WHERE id IN (
+  '66666666-6666-6666-6666-666666666601', '66666666-6666-6666-6666-666666666602',
+  '66666666-6666-6666-6666-666666666603'
+);
+DELETE FROM company_settings WHERE id = '55555555-5555-5555-5555-555555555555';
+DELETE FROM user_stores WHERE user_id = '33333333-3333-3333-3333-333333333333';
+DELETE FROM stores WHERE id = '44444444-4444-4444-4444-444444444444';
+DELETE FROM user_roles WHERE user_id = '33333333-3333-3333-3333-333333333333';
+DELETE FROM users WHERE id = '33333333-3333-3333-3333-333333333333';
+DELETE FROM role_permissions WHERE role_id IN (
+  '11111111-1111-1111-1111-111111111101', '11111111-1111-1111-1111-111111111102',
+  '11111111-1111-1111-1111-111111111103', '11111111-1111-1111-1111-111111111104'
+);
+DELETE FROM permissions WHERE id LIKE '22222222-2222-2222-2222-%';
+DELETE FROM roles WHERE id IN (
+  '11111111-1111-1111-1111-111111111101', '11111111-1111-1111-1111-111111111102',
+  '11111111-1111-1111-1111-111111111103', '11111111-1111-1111-1111-111111111104'
+);

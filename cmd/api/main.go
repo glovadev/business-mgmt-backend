@@ -28,12 +28,30 @@ import (
 	"business-mgmt-backend/internal/supplier"
 	"business-mgmt-backend/internal/system"
 	"business-mgmt-backend/internal/user"
+	"business-mgmt-backend/pkg/database"
 )
 
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	// Optional PostgreSQL Connection & Auto-Migration
+	if os.Getenv("AUTO_MIGRATE") == "true" || os.Getenv("DATABASE_URL") != "" {
+		cfg := database.LoadConfigFromEnv()
+		db, err := database.Connect(cfg)
+		if err != nil {
+			log.Printf("⚠️ PostgreSQL connection check: %v (continuing)", err)
+		} else {
+			defer db.Close()
+			log.Printf("🐘 Connected to PostgreSQL: %s:%s/%s", cfg.Host, cfg.Port, cfg.DBName)
+			if os.Getenv("AUTO_MIGRATE") == "true" {
+				if err := database.MigrateUp(db); err != nil {
+					log.Printf("⚠️ Auto-migrate failed: %v", err)
+				}
+			}
+		}
 	}
 
 	mux := http.NewServeMux()
