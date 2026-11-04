@@ -174,4 +174,25 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+
+	// RequireRole allows access only to users who have the required role.
+func RequireRole(requiredRole string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			roles, ok := r.Context().Value("roles").([]string)
+			if !ok {
+				utils.RespondError(w, http.StatusForbidden, "Access denied")
+				return
+			}
+
+			for _, role := range roles {
+				if strings.EqualFold(role, requiredRole) {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
+			utils.RespondError(w, http.StatusForbidden, "Super Admin access required")
+		})
+	}
 }

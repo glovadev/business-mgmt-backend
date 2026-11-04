@@ -3,10 +3,13 @@ package user
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"business-mgmt-backend/internal/models"
+
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -33,42 +36,81 @@ func NewService(repo Repository) Service {
 	return &serviceImpl{repo: repo}
 }
 
-func (s *serviceImpl) CreateUser(ctx context.Context, req models.CreateUserRequest) error {
-	if req.Email == "" || req.FullName == "" {
+func (s *serviceImpl) CreateUser(
+	ctx context.Context,
+	req models.CreateUserRequest,
+) error {
+	req.FullName = strings.TrimSpace(req.FullName)
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+
+	if req.Email == "" || req.FullName == "" || req.Password == "" {
 		return ErrInvalidInput
 	}
 
+	if len(req.Password) < 8 {
+		return errors.New("password must contain at least 8 characters")
+	}
+
+	if len(req.Password) > 72 {
+		return errors.New("password must not exceed 72 bytes")
+	}
+
+	if len(req.RoleCodes) == 0 {
+		return errors.New("at least one role is required")
+	}
+
+	hasStoreAdmin := false
+	for _, role := range req.RoleCodes {
+		if strings.EqualFold(strings.TrimSpace(role), "STORE_ADMIN") {
+			hasStoreAdmin = true
+		}
+	}
+
+	if hasStoreAdmin && len(req.StoreIDs) == 0 {
+		return errors.New("a Store Admin must be assigned at least one store")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword(
+		[]byte(req.Password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+
 	user := &models.User{
-		ID:        uuid.New(),
-		Email:     req.Email,
-		FullName:  req.FullName,
-		Status:    "ACTIVE",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:           uuid.New(),
+		Email:        req.Email,
+		PasswordHash: string(passwordHash),
+		FullName:     req.FullName,
+		Status:       "ACTIVE",
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 
 	if req.Phone != "" {
-		user.Phone = &req.Phone
+		phone := strings.TrimSpace(req.Phone)
+		user.Phone = &phone
 	}
 
-	// In a real application, you would generate a temporary password,
-	// hash it with bcrypt, and send an account setup link via email.
-	
 	if err := s.repo.CreateUser(ctx, user); err != nil {
 		return err
 	}
 
-	if len(req.RoleCodes) > 0 {
-		_ = s.repo.AssignRoles(ctx, user.ID, req.RoleCodes)
+	if err := s.repo.AssignRoles(ctx, user.ID, req.RoleCodes); err != nil {
+		return err
 	}
 
 	if len(req.StoreIDs) > 0 {
-		_ = s.repo.AssignStores(ctx, user.ID, req.StoreIDs)
+		if err := s.repo.AssignStores(ctx, user.ID, req.StoreIDs); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
-
 func (s *serviceImpl) ListUsers(ctx context.Context, page, pageSize int, filters map[string]string) (*models.ListUsersResponse, error) {
 	if page < 1 {
 		page = 1

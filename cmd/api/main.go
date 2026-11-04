@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,23 +35,27 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "9000"
 	}
 
-	// Optional PostgreSQL Connection & Auto-Migration
-	if os.Getenv("AUTO_MIGRATE") == "true" || os.Getenv("DATABASE_URL") != "" {
-		cfg := database.LoadConfigFromEnv()
-		db, err := database.Connect(cfg)
-		if err != nil {
-			log.Printf("⚠️ PostgreSQL connection check: %v (continuing)", err)
-		} else {
-			defer db.Close()
-			log.Printf("🐘 Connected to PostgreSQL: %s:%s/%s", cfg.Host, cfg.Port, cfg.DBName)
-			if os.Getenv("AUTO_MIGRATE") == "true" {
-				if err := database.MigrateUp(db); err != nil {
-					log.Printf("⚠️ Auto-migrate failed: %v", err)
-				}
-			}
+	// PostgreSQL Connection & Auto-Migration
+	var db *sql.DB
+
+	cfg := database.LoadConfigFromEnv()
+	connectedDB, err := database.Connect(cfg)
+	if err != nil {
+		log.Fatalf("PostgreSQL connection failed: %v", err)
+	}
+
+	db = connectedDB
+	defer db.Close()
+
+	log.Printf("Connected to PostgreSQL: %s:%s/%s",
+		cfg.Host, cfg.Port, cfg.DBName)
+
+	if os.Getenv("AUTO_MIGRATE") == "true" {
+		if err := database.MigrateUp(db); err != nil {
+			log.Fatalf("Database migration failed: %v", err)
 		}
 	}
 
@@ -70,7 +75,6 @@ func main() {
 	// 3. User Management
 	userHandler := user.NewHandler(user.NewService(&StubUserRepo{}))
 	user.RegisterRoutes(mux, userHandler, auth.AuthMiddleware)
-
 	// 4. RBAC
 	rbacHandler := rbac.NewHandler(rbac.NewService(&StubRBACRepo{}))
 	rbac.RegisterRoutes(mux, rbacHandler, auth.AuthMiddleware)

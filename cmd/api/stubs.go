@@ -7,6 +7,7 @@ import (
 
 	"business-mgmt-backend/internal/models"
 	"business-mgmt-backend/internal/payment"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -36,7 +37,7 @@ func NewStubAuthUserRepo() *StubAuthUserRepo {
 			PasswordHash: string(hash),
 			FullName:     "System Administrator",
 			Status:       "ACTIVE",
-			Roles:        []string{"ADMIN"},
+			Roles:        []string{"SUPER_ADMIN"},
 			Permissions:  []string{"*"},
 			CreatedAt:    now,
 			UpdatedAt:    now,
@@ -107,10 +108,18 @@ func (r *StubUserRepo) GetUserByID(ctx context.Context, id uuid.UUID) (*models.U
 func (r *StubUserRepo) ListUsers(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.User, int, error) {
 	return []models.User{}, 0, nil
 }
-func (r *StubUserRepo) UpdateUser(ctx context.Context, id uuid.UUID, fullName, phone *string) error { return nil }
-func (r *StubUserRepo) UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) error   { return nil }
-func (r *StubUserRepo) AssignRoles(ctx context.Context, id uuid.UUID, roleCodes []string) error    { return nil }
-func (r *StubUserRepo) AssignStores(ctx context.Context, id uuid.UUID, storeIDs []uuid.UUID) error { return nil }
+func (r *StubUserRepo) UpdateUser(ctx context.Context, id uuid.UUID, fullName, phone *string) error {
+	return nil
+}
+func (r *StubUserRepo) UpdateUserStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
+func (r *StubUserRepo) AssignRoles(ctx context.Context, id uuid.UUID, roleCodes []string) error {
+	return nil
+}
+func (r *StubUserRepo) AssignStores(ctx context.Context, id uuid.UUID, storeIDs []uuid.UUID) error {
+	return nil
+}
 
 // --- RBAC Repo ---
 
@@ -118,12 +127,21 @@ type StubRBACRepo struct{}
 
 func (r *StubRBACRepo) ListRoles(ctx context.Context) ([]models.Role, error) {
 	return []models.Role{
-		{ID: uuid.New(), Code: "ADMIN", Name: "Administrator"},
-		{ID: uuid.New(), Code: "STORE_MANAGER", Name: "Store Manager"},
+		{ID: uuid.New(), Code: "SUPER_ADMIN", Name: "Super Admin"},
+		{ID: uuid.New(), Code: "STORE_ADMIN", Name: "Store Admin"},
+		{ID: uuid.New(), Code: "FINANCE_ADMIN", Name: "Finance Admin"},
+		{ID: uuid.New(), Code: "STAFF", Name: "Staff"},
 	}, nil
 }
-func (r *StubRBACRepo) GetRoleByID(ctx context.Context, roleID uuid.UUID) (*models.Role, error) {
-	return &models.Role{ID: roleID, Code: "ADMIN", Name: "Administrator"}, nil
+func (r *StubRBACRepo) GetRoleByID(
+	ctx context.Context,
+	roleID uuid.UUID,
+) (*models.Role, error) {
+	return &models.Role{
+		ID:   roleID,
+		Code: "SUPER_ADMIN",
+		Name: "Super Admin",
+	}, nil
 }
 func (r *StubRBACRepo) ListPermissions(ctx context.Context) ([]models.Permission, error) {
 	return []models.Permission{
@@ -146,14 +164,20 @@ func (r *StubStoreRepo) GetStoreByID(ctx context.Context, id uuid.UUID) (*models
 func (r *StubStoreRepo) ListStores(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.StoreModel, int, error) {
 	return []models.StoreModel{{ID: uuid.New(), Name: "Main Branch", Code: "MAIN-01", Status: "ACTIVE"}}, 1, nil
 }
-func (r *StubStoreRepo) UpdateStore(ctx context.Context, id uuid.UUID, store *models.StoreModel) error { return nil }
-func (r *StubStoreRepo) UpdateStoreStatus(ctx context.Context, id uuid.UUID, status string) error     { return nil }
+func (r *StubStoreRepo) UpdateStore(ctx context.Context, id uuid.UUID, store *models.StoreModel) error {
+	return nil
+}
+func (r *StubStoreRepo) UpdateStoreStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
 
 // --- Customer Repo ---
 
 type StubCustomerRepo struct{}
 
-func (r *StubCustomerRepo) CreateCustomer(ctx context.Context, customer *models.CustomerModel) error { return nil }
+func (r *StubCustomerRepo) CreateCustomer(ctx context.Context, customer *models.CustomerModel) error {
+	return nil
+}
 func (r *StubCustomerRepo) GetCustomerByID(ctx context.Context, id uuid.UUID) (*models.CustomerModel, error) {
 	return &models.CustomerModel{ID: id, Name: "Jane Doe", PhoneNumber: "9876543210", Status: "ACTIVE"}, nil
 }
@@ -163,16 +187,26 @@ func (r *StubCustomerRepo) GetCustomerByPhone(ctx context.Context, phone string)
 func (r *StubCustomerRepo) ListCustomers(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.CustomerModel, int, error) {
 	return []models.CustomerModel{}, 0, nil
 }
-func (r *StubCustomerRepo) UpdateCustomer(ctx context.Context, id uuid.UUID, customer *models.CustomerModel) error { return nil }
-func (r *StubCustomerRepo) UpdateCustomerStatus(ctx context.Context, id uuid.UUID, status string) error           { return nil }
-func (r *StubCustomerRepo) LinkCustomerToStore(ctx context.Context, customerID, storeID uuid.UUID, addedBy *uuid.UUID) error { return nil }
-func (r *StubCustomerRepo) GetCustomerStores(ctx context.Context, customerID uuid.UUID) ([]models.StoreModel, error) { return []models.StoreModel{}, nil }
+func (r *StubCustomerRepo) UpdateCustomer(ctx context.Context, id uuid.UUID, customer *models.CustomerModel) error {
+	return nil
+}
+func (r *StubCustomerRepo) UpdateCustomerStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
+func (r *StubCustomerRepo) LinkCustomerToStore(ctx context.Context, customerID, storeID uuid.UUID, addedBy *uuid.UUID) error {
+	return nil
+}
+func (r *StubCustomerRepo) GetCustomerStores(ctx context.Context, customerID uuid.UUID) ([]models.StoreModel, error) {
+	return []models.StoreModel{}, nil
+}
 
 // --- Product Category Repo ---
 
 type StubProductCategoryRepo struct{}
 
-func (r *StubProductCategoryRepo) CreateCategory(ctx context.Context, category *models.ProductCategory) error { return nil }
+func (r *StubProductCategoryRepo) CreateCategory(ctx context.Context, category *models.ProductCategory) error {
+	return nil
+}
 func (r *StubProductCategoryRepo) GetCategoryByID(ctx context.Context, id uuid.UUID) (*models.ProductCategory, error) {
 	return &models.ProductCategory{ID: id, Name: "General", Status: "ACTIVE"}, nil
 }
@@ -182,14 +216,20 @@ func (r *StubProductCategoryRepo) GetCategoryByName(ctx context.Context, name st
 func (r *StubProductCategoryRepo) ListCategories(ctx context.Context) ([]models.ProductCategory, error) {
 	return []models.ProductCategory{{ID: uuid.New(), Name: "Electronics", Status: "ACTIVE"}}, nil
 }
-func (r *StubProductCategoryRepo) UpdateCategory(ctx context.Context, id uuid.UUID, category *models.ProductCategory) error { return nil }
-func (r *StubProductCategoryRepo) UpdateCategoryStatus(ctx context.Context, id uuid.UUID, status string) error             { return nil }
+func (r *StubProductCategoryRepo) UpdateCategory(ctx context.Context, id uuid.UUID, category *models.ProductCategory) error {
+	return nil
+}
+func (r *StubProductCategoryRepo) UpdateCategoryStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
 
 // --- Product Repo ---
 
 type StubProductRepo struct{}
 
-func (r *StubProductRepo) CreateProduct(ctx context.Context, product *models.ProductModel) error { return nil }
+func (r *StubProductRepo) CreateProduct(ctx context.Context, product *models.ProductModel) error {
+	return nil
+}
 func (r *StubProductRepo) GetProductByID(ctx context.Context, id uuid.UUID) (*models.ProductModel, error) {
 	return &models.ProductModel{ID: id, Name: "Sample Item", SKU: "SMP-001", Status: "ACTIVE", DefaultSellingPrice: "100.00"}, nil
 }
@@ -199,8 +239,12 @@ func (r *StubProductRepo) GetProductBySKU(ctx context.Context, sku string) (*mod
 func (r *StubProductRepo) ListProducts(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.ProductModel, int, error) {
 	return []models.ProductModel{}, 0, nil
 }
-func (r *StubProductRepo) UpdateProduct(ctx context.Context, id uuid.UUID, product *models.ProductModel) error { return nil }
-func (r *StubProductRepo) UpdateProductStatus(ctx context.Context, id uuid.UUID, status string) error         { return nil }
+func (r *StubProductRepo) UpdateProduct(ctx context.Context, id uuid.UUID, product *models.ProductModel) error {
+	return nil
+}
+func (r *StubProductRepo) UpdateProductStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
 func (r *StubProductRepo) GetProductInventoryAcrossStores(ctx context.Context, id uuid.UUID) ([]models.ProductInventoryData, error) {
 	return []models.ProductInventoryData{}, nil
 }
@@ -209,29 +253,41 @@ func (r *StubProductRepo) GetProductInventoryAcrossStores(ctx context.Context, i
 
 type StubSupplierRepo struct{}
 
-func (r *StubSupplierRepo) CreateSupplier(ctx context.Context, supplier *models.SupplierModel) error { return nil }
+func (r *StubSupplierRepo) CreateSupplier(ctx context.Context, supplier *models.SupplierModel) error {
+	return nil
+}
 func (r *StubSupplierRepo) GetSupplierByID(ctx context.Context, id uuid.UUID) (*models.SupplierModel, error) {
 	return &models.SupplierModel{ID: id, Name: "Acme Supplies", Status: "ACTIVE"}, nil
 }
 func (r *StubSupplierRepo) ListSuppliers(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.SupplierModel, int, error) {
 	return []models.SupplierModel{}, 0, nil
 }
-func (r *StubSupplierRepo) UpdateSupplier(ctx context.Context, id uuid.UUID, supplier *models.SupplierModel) error { return nil }
-func (r *StubSupplierRepo) UpdateSupplierStatus(ctx context.Context, id uuid.UUID, status string) error           { return nil }
+func (r *StubSupplierRepo) UpdateSupplier(ctx context.Context, id uuid.UUID, supplier *models.SupplierModel) error {
+	return nil
+}
+func (r *StubSupplierRepo) UpdateSupplierStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
 
 // --- Purchase Repo ---
 
 type StubPurchaseRepo struct{}
 
-func (r *StubPurchaseRepo) CreatePurchase(ctx context.Context, purchase *models.PurchaseModel) error { return nil }
+func (r *StubPurchaseRepo) CreatePurchase(ctx context.Context, purchase *models.PurchaseModel) error {
+	return nil
+}
 func (r *StubPurchaseRepo) GetPurchaseByID(ctx context.Context, id uuid.UUID) (*models.PurchaseModel, error) {
 	return &models.PurchaseModel{ID: id, PurchaseNumber: "PO-001", Status: "DRAFT"}, nil
 }
 func (r *StubPurchaseRepo) ListPurchases(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.PurchaseModel, int, error) {
 	return []models.PurchaseModel{}, 0, nil
 }
-func (r *StubPurchaseRepo) UpdatePurchase(ctx context.Context, purchase *models.PurchaseModel) error { return nil }
-func (r *StubPurchaseRepo) UpdatePurchaseStatus(ctx context.Context, id uuid.UUID, status string) error { return nil }
+func (r *StubPurchaseRepo) UpdatePurchase(ctx context.Context, purchase *models.PurchaseModel) error {
+	return nil
+}
+func (r *StubPurchaseRepo) UpdatePurchaseStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
 func (r *StubPurchaseRepo) ExecuteApprovalTransaction(ctx context.Context, purchaseID uuid.UUID, approvedBy *uuid.UUID, fn func(context.Context, *models.PurchaseModel) error) error {
 	return nil
 }
@@ -309,22 +365,30 @@ func (r *StubPaymentRepo) ExecutePaymentReversalTransaction(ctx context.Context,
 
 type StubExpenseRepo struct{}
 
-func (r *StubExpenseRepo) CreateExpenseCategory(ctx context.Context, category *models.ExpenseCategoryModel) error { return nil }
+func (r *StubExpenseRepo) CreateExpenseCategory(ctx context.Context, category *models.ExpenseCategoryModel) error {
+	return nil
+}
 func (r *StubExpenseRepo) GetExpenseCategoryByID(ctx context.Context, id uuid.UUID) (*models.ExpenseCategoryModel, error) {
 	return &models.ExpenseCategoryModel{ID: id, Name: "Rent"}, nil
 }
 func (r *StubExpenseRepo) ListExpenseCategories(ctx context.Context, filters map[string]string) ([]models.ExpenseCategoryModel, int, error) {
 	return []models.ExpenseCategoryModel{}, 0, nil
 }
-func (r *StubExpenseRepo) UpdateExpenseCategory(ctx context.Context, category *models.ExpenseCategoryModel) error { return nil }
-func (r *StubExpenseRepo) CreateExpense(ctx context.Context, expense *models.ExpenseModel) error                 { return nil }
+func (r *StubExpenseRepo) UpdateExpenseCategory(ctx context.Context, category *models.ExpenseCategoryModel) error {
+	return nil
+}
+func (r *StubExpenseRepo) CreateExpense(ctx context.Context, expense *models.ExpenseModel) error {
+	return nil
+}
 func (r *StubExpenseRepo) GetExpenseByID(ctx context.Context, id uuid.UUID) (*models.ExpenseModel, error) {
 	return &models.ExpenseModel{ID: id, Amount: "500.00", Description: "Office Supplies"}, nil
 }
 func (r *StubExpenseRepo) ListExpenses(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.ExpenseModel, int, error) {
 	return []models.ExpenseModel{}, 0, nil
 }
-func (r *StubExpenseRepo) UpdateExpense(ctx context.Context, expense *models.ExpenseModel) error { return nil }
+func (r *StubExpenseRepo) UpdateExpense(ctx context.Context, expense *models.ExpenseModel) error {
+	return nil
+}
 func (r *StubExpenseRepo) ExecuteExpenseReversalTransaction(ctx context.Context, expenseID uuid.UUID, reason string, currentUserID uuid.UUID) error {
 	return nil
 }
@@ -348,34 +412,46 @@ func (r *StubConfigRepo) UpdateCompanySettings(ctx context.Context, settings *mo
 
 type StubReminderRuleRepo struct{}
 
-func (r *StubReminderRuleRepo) CreateRule(ctx context.Context, rule *models.ReminderRuleModel) error { return nil }
+func (r *StubReminderRuleRepo) CreateRule(ctx context.Context, rule *models.ReminderRuleModel) error {
+	return nil
+}
 func (r *StubReminderRuleRepo) ListRules(ctx context.Context) ([]models.ReminderRuleModel, error) {
 	return []models.ReminderRuleModel{}, nil
 }
 func (r *StubReminderRuleRepo) GetRuleByID(ctx context.Context, id uuid.UUID) (*models.ReminderRuleModel, error) {
 	return &models.ReminderRuleModel{ID: id, Status: "ACTIVE"}, nil
 }
-func (r *StubReminderRuleRepo) UpdateRule(ctx context.Context, rule *models.ReminderRuleModel) error { return nil }
-func (r *StubReminderRuleRepo) ExecuteReorderTransaction(ctx context.Context, updates map[uuid.UUID]int) error { return nil }
+func (r *StubReminderRuleRepo) UpdateRule(ctx context.Context, rule *models.ReminderRuleModel) error {
+	return nil
+}
+func (r *StubReminderRuleRepo) ExecuteReorderTransaction(ctx context.Context, updates map[uuid.UUID]int) error {
+	return nil
+}
 
 // --- Notification Template Repo ---
 
 type StubNotificationTemplateRepo struct{}
 
-func (r *StubNotificationTemplateRepo) CreateTemplate(ctx context.Context, template *models.NotificationTemplateModel) error { return nil }
+func (r *StubNotificationTemplateRepo) CreateTemplate(ctx context.Context, template *models.NotificationTemplateModel) error {
+	return nil
+}
 func (r *StubNotificationTemplateRepo) ListTemplates(ctx context.Context) ([]models.NotificationTemplateModel, error) {
 	return []models.NotificationTemplateModel{}, nil
 }
 func (r *StubNotificationTemplateRepo) GetTemplateByID(ctx context.Context, id uuid.UUID) (*models.NotificationTemplateModel, error) {
 	return &models.NotificationTemplateModel{ID: id, Code: "PAYMENT_REMINDER", Status: "ACTIVE"}, nil
 }
-func (r *StubNotificationTemplateRepo) UpdateTemplate(ctx context.Context, template *models.NotificationTemplateModel) error { return nil }
+func (r *StubNotificationTemplateRepo) UpdateTemplate(ctx context.Context, template *models.NotificationTemplateModel) error {
+	return nil
+}
 
 // --- Notification Repo & Validator ---
 
 type StubNotificationRepo struct{}
 
-func (r *StubNotificationRepo) CreateNotification(ctx context.Context, notification *models.NotificationModel) error { return nil }
+func (r *StubNotificationRepo) CreateNotification(ctx context.Context, notification *models.NotificationModel) error {
+	return nil
+}
 func (r *StubNotificationRepo) GetNotificationByID(ctx context.Context, id uuid.UUID) (*models.NotificationModel, error) {
 	return &models.NotificationModel{ID: id, Status: "SENT"}, nil
 }
@@ -385,7 +461,9 @@ func (r *StubNotificationRepo) GetNotificationByProviderMessageID(ctx context.Co
 func (r *StubNotificationRepo) ListNotifications(ctx context.Context, page, pageSize int, filters map[string]string) ([]models.NotificationModel, int, error) {
 	return []models.NotificationModel{}, 0, nil
 }
-func (r *StubNotificationRepo) UpdateNotification(ctx context.Context, notification *models.NotificationModel) error { return nil }
+func (r *StubNotificationRepo) UpdateNotification(ctx context.Context, notification *models.NotificationModel) error {
+	return nil
+}
 
 type StubNotificationValidator struct{}
 
